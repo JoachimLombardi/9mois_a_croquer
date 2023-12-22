@@ -1,5 +1,6 @@
 import streamlit as st
 import meilisearch
+from config.config import MEILI_API_ADM_KEY, MEILI_SERVER
 
 st.set_page_config(
     page_title="Main",
@@ -9,7 +10,7 @@ st.set_page_config(
 st.title('9 Mois à Croquer')
 st.sidebar.markdown('# Main Page')
 
-client = meilisearch.Client('http://localhost:7700', 'ZViEJIa3iKUeBLdEem4n74O4rKID8TjwXns7We9Mqmg')
+client = meilisearch.Client(f"http://{MEILI_API_ADM_KEY}", MEILI_SERVER)
 
 search = st.text_input('Search')
 

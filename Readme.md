@@ -81,6 +81,14 @@ Once everything installed and configurated.
 ```
 
 
+## Demo
+
+The __main.py__ script use a Streamlit inteface to connect with Meilisearch server and query all the database. 
+
+In this example we used the __multi_search()__ provided by meilisearch API to query the database.
+
+https://www.meilisearch.com/docs/reference/api/multi_search
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
