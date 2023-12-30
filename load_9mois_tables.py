@@ -2,7 +2,8 @@
 import meilisearch
 import json
 import mysql.connector
-from config.config import DATABASE_HOST, DATABASE_NAME, DATABASE_PASSWORD, DATABASE_USERNAME, MEILI_API_ADM_KEY, MEILI_SERVER
+import re
+from config.config import DATABASE_HOST, DATABASE_NAME, DATABASE_PASSWORD, DATABASE_USERNAME
 
 # Connect to the database
 conn = mysql.connector.connect(
@@ -23,19 +24,14 @@ def table_to_json(table_name, fields='*'):
     for row in rows:
         d = {}
         for i, col in enumerate(cursor.description):
-            d[col[0]] = str(row[i]).replace('\n', '<br>')
+            res = re.sub(pattern_1, '', str(row[i]))
+            res = re.sub(pattern_2, '', res)
+            d[col[0]] = str(res).replace('\n', '').replace('\\', '').replace('*', '')
         result.append(d)
     
     json_result = json.dumps(result)
     return json_result
 
-# Import JSON to meilisearch
-def json_to_meilisearch(table_name, fields='*', primary_key='id'):
-    client.index(table_name).delete()
-    json_result = table_to_json(table_name=table_name, fields=fields)
-    client.index(table_name).update_documents(primary_key=primary_key,documents=json.loads(json_result))
-
-client = meilisearch.Client(f"http://{MEILI_SERVER}", MEILI_API_ADM_KEY)
 
 tables = {
     0:{
@@ -45,12 +41,12 @@ tables = {
       },
     1:{
          'table_name': 'recipes',
-         'fields': 'id, name, time, difficulty, budget, img, review, nb_portions, side_food, steps, food',
+         'fields': 'id, name, time, difficulty, budget, review, nb_portions, side_food, steps, food',
          'primary_key': 'id'
     },
     2:{
          'table_name': 'articles',
-         'fields': 'id, title, content, img',
+         'fields': 'id, title, content',
          'primary_key': 'id'
     },
     3:{
@@ -60,8 +56,12 @@ tables = {
     }
 }
 
+
+# Retirer les balises
+pattern_1 = re.compile('<.*?>')
+pattern_2 = re.compile('\(.*?\)')
+pattern_3 = re.compile('\[.*?\]')
+
 for table in tables:
     table_name = tables[table]['table_name']
     fields = tables[table]['fields']
-    primary_key = tables[table]['primary_key']
-    json_to_meilisearch(table_name, fields, primary_key)
